@@ -1,9 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useEffect } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("Dashboard component mounted");
+    console.log("Auth status:", localStorage.getItem("isAuthenticated"));
+  }, []);
 
   const reports = [
     { id: 1, title: "Reporte 1", path: "/reporte-1" },

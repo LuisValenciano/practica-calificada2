@@ -12,10 +12,17 @@ const Login = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    // For demo purposes, any username/password works
     if (username.trim() && password.trim()) {
       localStorage.setItem("isAuthenticated", "true");
       navigate("/dashboard");
     }
+  };
+
+  // Quick bypass for testing - remove in production
+  const handleQuickLogin = () => {
+    localStorage.setItem("isAuthenticated", "true");
+    navigate("/dashboard");
   };
 
   return (
@@ -61,6 +68,15 @@ const Login = () => {
               disabled={!username.trim() || !password.trim()}
             >
               Ingresar
+            </Button>
+            
+            <Button 
+              type="button"
+              onClick={handleQuickLogin}
+              variant="secondary" 
+              className="w-full h-11 font-medium"
+            >
+              Test Login (Demo)
             </Button>
           </form>
         </CardContent>
