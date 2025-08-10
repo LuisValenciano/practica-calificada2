@@ -5,24 +5,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 
+const API = import.meta.env.VITE_API_URL; // ej: http://localhost:5287
+
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For demo purposes, any username/password works
-    if (username.trim() && password.trim()) {
-      localStorage.setItem("isAuthenticated", "true");
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/api/Auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      if (!res.ok) throw new Error("Credenciales inválidas");
+      const data = await res.json();
+      localStorage.setItem("authToken", data.token);
+      if (data.expiresAt) localStorage.setItem("tokenExpiry", data.expiresAt);
       navigate("/dashboard");
+    } catch (err: any) {
+      alert(err.message || "Error al iniciar sesión");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  // Quick bypass for testing - remove in production
-  const handleQuickLogin = () => {
-    localStorage.setItem("isAuthenticated", "true");
-    navigate("/dashboard");
   };
 
   return (
@@ -33,50 +42,28 @@ const Login = () => {
             <div className="text-center mb-8">
               <h1 className="text-2xl font-semibold text-foreground">Iniciar Sesión</h1>
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium">
-                Usuario
-              </Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="h-11"
-                required
-              />
+              <Label htmlFor="username">Usuario</Label>
+              <Input id="username" value={username} onChange={(e)=>setUsername(e.target.value)} className="h-11" required />
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Contraseña
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-11"
-                required
-              />
+              <Label htmlFor="password">Contraseña</Label>
+              <Input id="password" type="password" value={password} onChange={(e)=>setPassword(e.target.value)} className="h-11" required />
             </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full h-11 font-medium"
-              disabled={!username.trim() || !password.trim()}
-            >
-              Ingresar
+
+            <Button type="submit" className="w-full h-11 font-medium" disabled={!username.trim() || !password.trim() || loading}>
+              {loading ? "Ingresando..." : "Ingresar"}
             </Button>
-            
-            <Button 
+
+            <Button
               type="button"
-              onClick={handleQuickLogin}
-              variant="secondary" 
+              variant="secondary"
               className="w-full h-11 font-medium"
+              onClick={() => navigate("/register")}
             >
-              Test Login (Demo)
+              Crear cuenta
             </Button>
           </form>
         </CardContent>
